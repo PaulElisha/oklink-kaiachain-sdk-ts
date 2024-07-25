@@ -28,3 +28,9 @@ export interface AddressData {
   unclaimedVotingRewards: string;
   isAaAddress: boolean;
 }
+
+export interface ApiResponse<T> {
+  code: number;
+  data: T;
+  msg: string;
+}

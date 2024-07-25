@@ -1,10 +1,13 @@
+import { Address } from "./types/Address";
+import { ProtocolType } from "./types/ProtocolType";
+import { AddressInformation } from "./interfaces/AddressInformationResponse";
+import { ApiResponse } from "./interfaces/AddressInformationResponse";
+
 const BASE_URL = "https://www.oklink.com/";
 const chainId = "8217";
 const chainFullName = "KLAYTN";
 const chainShortName = "KLAYTN";
 
-import { Address } from "./types/Address";
-import { ProtocolType } from "./types/ProtocolType";
 
 export class Oklink {
   apiKey: string;
@@ -24,17 +27,33 @@ export class Oklink {
     return headers;
   }
 
+  private async fetchApi<T>(url: string): Promise<ApiResponse<T>> {
+    try {
+      const response = await fetch(url, {
+        headers: this.header(), 
+      });
+      if(!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if(data.code != 0) {
+        throw new Error(`API error! code: ${data.code}, message: ${data.msg}`);
+      }
+      return data;
+    } catch (error) {
+      console.log(`Fetch API error: ${error}`);
+      throw error;
+    }
+  }
+
   // Blockchain General API - Address (https://www.oklink.com/docs/en/#blockchain-general-api-address)
-  async addressInfo(address: Address) {
+  async addressInfo(address: Address): Promise<ApiResponse<AddressInformation>> {
     const params = new URLSearchParams({
       chainShortName: chainShortName,
       address: address,
     });
     const url = `${this.baseUrl}api/v5/explorer/address/address-summary?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi<AddressInformation>(url);
   }
 
   async evmAddressInfo(address: Address) {
@@ -43,10 +62,7 @@ export class Oklink {
       address: address,
     });
     const url = `${this.baseUrl}api/v5/explorer/address/information-evm?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
   }
 
   async addressActiveChain(address: Address) {
@@ -55,10 +71,8 @@ export class Oklink {
       address: address,
     });
     const url = `${this.baseUrl}api/v5/explorer/address/address-active-chain?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async addressTokenBalance(
@@ -83,10 +97,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/address/token-balance?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async addressBalanceDetails(
@@ -111,10 +123,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/address/address-balance-fills?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async addressBalanceHistory(
@@ -131,10 +141,8 @@ export class Oklink {
       params.append("tokenContractAddress", tokenContractAddress);
     }
     const url = `${this.baseUrl}api/v5/explorer/block/address-balance-history?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async addressTransactionList(
@@ -173,10 +181,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/address/transaction-list?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async addressNormalTransactionList(
@@ -207,10 +213,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/address/normal-transaction-list?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async addressInternalTransactionList(
@@ -241,10 +245,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/address/internal-transaction-list?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async addressTokenTransactionList(
@@ -269,10 +271,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/address/token-transaction-list?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async addressEntityLabels(address: Address) {
@@ -281,10 +281,8 @@ export class Oklink {
       address: address,
     });
     const url = `${this.baseUrl}api/v5/explorer/address/entity-labels?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async batchAddressBalances(addresses: Address[]) {
@@ -296,10 +294,8 @@ export class Oklink {
       addresses: addresses.join(","),
     });
     const url = `${this.baseUrl}api/v5/explorer/address/balance-multi?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async batchAddressTokenBalances(
@@ -325,10 +321,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/address/token-balance-multi?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async batchAddressNormalTransactionList(
@@ -362,10 +356,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/address/normal-transaction-list-multi?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async batchAddressInternalTransactionList(
@@ -399,10 +391,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/address/internal-transaction-list-multi?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async batchAddressTokenTransactionList(
@@ -440,10 +430,8 @@ export class Oklink {
       params.append("isFromOrTo", isFromOrTo);
     }
     const url = `${this.baseUrl}api/v5/explorer/address/token-transaction-list-multi?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async richList(address?: Address) {
@@ -454,10 +442,8 @@ export class Oklink {
       params.append("address", address);
     }
     const url = `${this.baseUrl}api/v5/explorer/address/rich-list?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async nativeTokenRanking(page?: string, limit?: string) {
@@ -471,10 +457,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/address/native-token-position-list?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   // Transaction (https://www.oklink.com/docs/en/#blockchain-general-api-transaction)
@@ -500,10 +484,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/transaction/transaction-list?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async largeTransactionList(
@@ -528,10 +510,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/transaction/large-transaction-list?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async unconfirmedTransactionList(page?: string, limit?: string) {
@@ -545,10 +525,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/transaction/unconfirmed-transaction-list?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async internalTransactionDetails(
@@ -567,10 +545,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/transaction/internal-transaction-detail?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async tokenTransactionDetails(
@@ -593,10 +569,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/transaction/token-transaction-detail?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async transactionDetails(txId: string) {
@@ -605,10 +579,8 @@ export class Oklink {
       txId: txId,
     });
     const url = `${this.baseUrl}api/v5/explorer/transaction/transaction-fills?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async batchTransactionDetails(txIds: string[]) {
@@ -620,10 +592,8 @@ export class Oklink {
       txIds: txIds.join(","),
     });
     const url = `${this.baseUrl}api/v5/explorer/transaction/transaction-multi?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async batchInternalTransactionDetails(txIds: string[]) {
@@ -635,10 +605,8 @@ export class Oklink {
       txIds: txIds.join(","),
     });
     const url = `${this.baseUrl}api/v5/explorer/transaction/internal-transaction-multi?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async batchTokenTransactionDetails(
@@ -664,10 +632,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/transaction/token-transfer-multi?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   // Token (https://www.oklink.com/docs/en/#blockchain-general-api-token)
@@ -705,10 +671,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/token/token-list?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async tokenPositionList(
@@ -731,10 +695,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/token/position-list?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async tokenPositionStatistics(
@@ -757,10 +719,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/token/position-statistics?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+    
   }
 
   async tokenTransferDetails(
@@ -787,10 +747,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/token/transaction-list?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async batchTokenTransaction(
@@ -813,10 +771,8 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/token/token-transaction-list-multi?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async tokenSupplyHistory(
@@ -829,10 +785,8 @@ export class Oklink {
       height: height,
     });
     const url = `${this.baseUrl}api/v5/explorer/token/supply-history?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 
   async tokenTransactionStatistics(
@@ -855,9 +809,7 @@ export class Oklink {
       params.append("limit", limit);
     }
     const url = `${this.baseUrl}api/v5/explorer/token/transaction-stats?${params}`;
-    const response = await fetch(url, {
-      headers: this.header(),
-    });
-    return response.json();
+    return this.fetchApi(url);
+
   }
 }
